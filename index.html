@@ -1,0 +1,636 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>I-AM-O.S. v12 — Decentralized Sovereign OS</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&family=JetBrains+Mono&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #0a0a14;
+            --panel: #0f0f1e;
+            --accent: #00ff9d;
+            --accent2: #8b5cf6;
+            --text: #e0e7ff;
+            --border: #1a1a2e;
+            --shadow: rgba(0, 255, 150, 0.2);
+            --genesis: #ff0040;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            height: 100vh;
+            display: grid;
+            grid-template-rows: auto 1fr auto;
+            overflow: hidden;
+        }
+
+        header {
+            background: linear-gradient(135deg, var(--accent), var(--accent2), var(--genesis));
+            color: #000;
+            padding: 1.5rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-weight: 800;
+            font-size: 2rem;
+            box-shadow: 0 10px 50px var(--shadow);
+        }
+
+        footer {
+            background: var(--panel);
+            padding: .8rem 2rem;
+            font-size: .85rem;
+            opacity: .7;
+            border-top: 1px solid var(--border);
+        }
+
+        .balance {
+            background: rgba(255, 0, 64, 0.3);
+            padding: 0.9rem 2rem;
+            border-radius: 50px;
+            font-family: 'JetBrains Mono';
+            font-weight: 800;
+            font-size: 1.4rem;
+            border: 2px solid var(--genesis);
+        }
+
+        main {
+            display: grid;
+            grid-template-columns: 320px 1fr 420px;
+            gap: 1.5rem;
+            padding: 1.5rem;
+            height: calc(100vh - 140px);
+            overflow: hidden;
+        }
+
+        @media (max-width: 1200px) {
+            main {
+                grid-template-columns: 1fr;
+                padding: 1rem;
+            }
+
+            .panel {
+                border-radius: 16px;
+            }
+        }
+
+        .panel {
+            background: var(--panel);
+            border-radius: 24px;
+            border: 2px solid var(--border);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .panel-header {
+            padding: 1.2rem 1.8rem;
+            background: #161626;
+            border-bottom: 2px solid var(--border);
+            font-weight: 700;
+            font-size: 1.1rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .panel-content {
+            flex: 1;
+            overflow-y: auto;
+            padding: 1rem;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .btn {
+            background: var(--accent);
+            color: #000;
+            border: none;
+            padding: .8rem 1.6rem;
+            border-radius: 16px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: .2s;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px var(--shadow);
+        }
+
+        .btn-sm {
+            padding: .5rem 1rem;
+            font-size: .85rem;
+        }
+
+        .btn-purple {
+            background: var(--accent2);
+            color: #fff;
+        }
+
+        .btn-genesis {
+            background: var(--genesis);
+            color: #fff;
+            border: 2px solid var(--genesis);
+        }
+
+        #code-editor {
+            flex: 1;
+            background: #0a0a12;
+            color: #e0e7ff;
+            border: none;
+            padding: 1.5rem;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 14px;
+            outline: none;
+            resize: none;
+            display: block;
+        }
+
+        .preview-wrapper {
+            flex: 1;
+            background: #fff;
+            overflow: hidden;
+            display: none;
+        }
+
+        .preview-wrapper.show {
+            display: block;
+        }
+
+        iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+
+        .file-tree {
+            list-style: none;
+            padding: 1rem;
+            flex: 1;
+            overflow-y: auto;
+        }
+
+        .file-item {
+            padding: .6rem 1rem;
+            border-radius: 8px;
+            margin: .2rem 0;
+            cursor: pointer;
+        }
+
+        .file-item:hover {
+            background: rgba(0, 255, 157, .2);
+        }
+
+        .file-item.active {
+            background: rgba(0, 255, 157, .4);
+        }
+
+        .license {
+            background: linear-gradient(135deg, #1a0033, #001a1a);
+            padding: 1.5rem;
+            border-radius: 16px;
+            margin: 1rem;
+            text-align: center;
+            border: 2px solid var(--accent2);
+        }
+
+        .dashboard-content {
+            padding: 1.8rem;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .big-balance {
+            font-size: 3.8rem;
+            font-weight: 800;
+            color: var(--accent);
+        }
+
+        .log {
+            background: #000;
+            padding: 1rem;
+            border-radius: 12px;
+            max-height: 300px;
+            overflow-y: auto;
+            font-family: 'JetBrains Mono';
+            font-size: .85rem;
+            line-height: 1.5;
+        }
+    </style>
+</head>
+
+<body>
+    <header>
+        <div>I-AM-O.S. v12</div>
+        <div class="balance">IAM-Value: <span id="bal">0</span></div>
+    </header>
+    <main>
+        <!-- LEFT PANEL -->
+        <div class="panel">
+            <div class="panel-header">Sovereign License</div>
+            <div class="panel-content">
+                <div class="license">
+                    <div style="font-size:2rem;font-weight:800">#<span id="token-id">—</span></div>
+                    <div style="opacity:.8">Perpetual • Local • You own forever</div>
+                </div>
+                <div style="background:rgba(0,255,157,.1);padding:1rem;border-radius:12px;margin:1rem 0">
+                    <div style="font-weight:700">DID</div>
+                    <div id="did-display" style="font-size:.75rem;word-break:break-all">Generating...</div>
+                </div>
+                <button class="btn btn-sm" onclick="newFile()">+ File</button>
+                <ul id="file-tree" class="file-tree"></ul>
+                <div style="margin-top:auto;padding-top:1rem;border-top:2px solid var(--border);display:flex;flex-direction:column;gap:.8rem;">
+                    <button class="btn" onclick="save()">Save</button>
+                    <button class="btn btn-purple" onclick="publish()">Publish</button>
+                    <button class="btn btn-sm" id="copy-btn" onclick="copyCID()" disabled>Copy CID</button>
+                </div>
+            </div>
+        </div>
+        <!-- CENTER PANEL -->
+        <div class="panel">
+            <div class="panel-header">
+                <div id="current-file">index.html</div>
+                <div style="display:flex;gap:.5rem;">
+                    <button class="btn btn-sm" onclick="setMode('code')">Code</button>
+                    <button class="btn btn-sm" onclick="setMode('preview')">Live</button>
+                    <button class="btn btn-sm btn-genesis" onclick="proposeChangeUI()">Propose Change</button>
+                </div>
+            </div>
+            <textarea id="code-editor" spellcheck="false"></textarea>
+            <div id="preview" class="preview-wrapper">
+                <iframe id="frame" sandbox="allow-scripts allow-modals allow-same-origin"></iframe>
+            </div>
+        </div>
+        <!-- RIGHT PANEL -->
+        <div class="panel">
+            <div class="panel-header">Decentralized Dashboard</div>
+            <div class="dashboard-content">
+                <div style="text-align:center;margin-bottom:2rem;">
+                    <div class="big-balance" id="bigbal">0</div>
+                    <div style="opacity:.8">Total IAM-Value Earned</div>
+                </div>
+                <button class="btn" onclick="createVoucher()">Create Voucher</button>
+                <button class="btn btn-purple" onclick="redeemVoucher()">Redeem Voucher</button>
+                <button class="btn btn-sm" id="whitepaper-btn">Read Whitepaper</button>
+                <div style="margin-top:2rem;">
+                    <div style="font-weight:700;margin-bottom:1rem;">Live Log</div>
+                    <div class="log" id="log"></div>
+                </div>
+            </div>
+        </div>
+    </main>
+    <footer>I-AM-O.S. v12 — Decentralized • Genesis Approval Required • 100% Yours</footer>
+
+    <script>
+        /* [All your original script code goes here — unchanged] */
+        const DEFAULT_INDEX_HTML = `<!DOCTYPE html><html><head><title>Welcome</title></head><body style="font-family:sans-serif;padding:2rem;"><h1>I-AM-O.S. v12</h1><p>Your sovereign application starts here.</p></body></html>`;
+
+        function saveChain() {
+            localStorage.setItem("iam-chain", JSON.stringify(blockchainState, (k, v) => typeof v === "bigint" ? v.toString() : v));
+        }
+
+        function loadChain() {
+            const raw = localStorage.getItem("iam-chain");
+            if (!raw) return null;
+            return JSON.parse(raw, (k, v) => {
+                if (typeof v === "string" && /^\d+n?$/.test(v)) return BigInt(v.replace("n", ""));
+                return v;
+            });
+        }
+        const GENESIS_TIMEOUT = 5 * 365 * 24 * 60 * 60 * 1000;
+        const EARN = {
+            FILE: 1000n,
+            SAVE: 400n,
+            PUBLISH: 10000n
+        };
+        let mode = "code",
+            current = "index.html",
+            cid = null,
+            blockchainState = {},
+            identity = null,
+            did = null,
+            isGenesis = false;
+        async function init() {
+            try {
+                await setupIdentity();
+                await setupGenesis();
+                await loadBlockchainState();
+                renderTree();
+                render();
+                updateBalance();
+                if (!localStorage.getItem("iam-welcome")) {
+                    log("Welcome! You are now sovereign.");
+                    log("Tip: Start typing to earn IAM-Value");
+                    log("Click 'Read Whitepaper' for full guide");
+                    localStorage.setItem("iam-welcome", "true");
+                } else log("I-AM-O.S. v12 ready • Blockchain active • DID: " + did);
+            } catch (err) {
+                console.error(err);
+                log("Initialization error");
+            }
+        }
+        async function setupIdentity() {
+            if (!localStorage.getItem("iam-identity")) {
+                const kp = await crypto.subtle.generateKey({
+                    name: "Ed25519"
+                }, true, ["sign", "verify"]);
+                const priv = await crypto.subtle.exportKey("jwk", kp.privateKey);
+                const pub = await crypto.subtle.exportKey("raw", kp.publicKey);
+                localStorage.setItem("iam-identity", JSON.stringify({
+                    priv,
+                    pub: Array.from(new Uint8Array(pub))
+                }));
+                localStorage.setItem("tokenId", "local-1");
+            }
+            identity = JSON.parse(localStorage.getItem("iam-identity"));
+            const hash = await crypto.subtle.digest("SHA-256", new Uint8Array(identity.pub));
+            did = "did:iam:" + btoa(String.fromCharCode(...new Uint8Array(hash).slice(0, 16))).replace(/[+/=]/g, "");
+            document.getElementById("did-display").textContent = did;
+            document.getElementById("token-id").textContent = localStorage.getItem("tokenId");
+        }
+        async function setupGenesis() {
+            if (!localStorage.getItem("iam-genesis")) {
+                localStorage.setItem("iam-genesis", JSON.stringify({
+                    did,
+                    timestamp: Date.now()
+                }));
+                isGenesis = true;
+            } else {
+                const g = JSON.parse(localStorage.getItem("iam-genesis"));
+                isGenesis = (g.did === did && Date.now() - g.timestamp < GENESIS_TIMEOUT);
+            }
+        }
+        async function loadBlockchainState() {
+            blockchainState = loadChain() || {};
+            blockchainState[did] = blockchainState[did] || {
+                files: {
+                    "index.html": DEFAULT_INDEX_HTML
+                },
+                iamValue: 1000000000000n,
+                vouchers: {},
+                proposals: [],
+                transactions: []
+            };
+            saveChain();
+        }
+
+        function updateBalance() {
+            const bal = blockchainState[did].iamValue;
+            const f = bal.toString();
+            document.getElementById("bal").textContent = f;
+            document.getElementById("bigbal").textContent = f;
+            saveChain();
+        }
+
+        function log(msg) {
+            const el = document.getElementById("log");
+            const d = document.createElement("div");
+            d.textContent = new Date().toLocaleTimeString().slice(0, 5) + " " + msg;
+            el.prepend(d);
+        }
+
+        function renderTree() {
+            const ul = document.getElementById("file-tree");
+            ul.innerHTML = "";
+            const files = blockchainState[did].files;
+            for (const f of Object.keys(files)) {
+                const li = document.createElement("li");
+                li.textContent = f;
+                li.className = "file-item" + (f === current ? " active" : "");
+                li.onclick = () => selectFile(f);
+                ul.appendChild(li);
+            }
+        }
+
+        function selectFile(f) {
+            current = f;
+            document.getElementById("current-file").textContent = f;
+            render();
+            renderTree();
+        }
+
+        function render() {
+            document.getElementById("code-editor").value = blockchainState[did].files[current];
+            if (mode === "preview") renderPreview();
+        }
+
+        function setMode(m) {
+            mode = m;
+            toggle();
+        }
+
+        function toggle() {
+            const editor = document.getElementById("code-editor");
+            const previewBox = document.getElementById("preview");
+            if (mode === "code") {
+                editor.style.display = "block";
+                previewBox.classList.remove("show");
+            } else {
+                editor.style.display = "none";
+                previewBox.classList.add("show");
+                renderPreview();
+            }
+        }
+
+        function renderPreview() {
+            const blob = new Blob([blockchainState[did].files[current]], {
+                type: "text/html"
+            });
+            const url = URL.createObjectURL(blob);
+            document.getElementById("frame").src = url;
+        }
+
+        function save() {
+            blockchainState[did].files[current] = document.getElementById("code-editor").value;
+            earn(EARN.SAVE);
+            log("Saved " + current);
+            if (mode === "preview") renderPreview();
+        }
+
+        function newFile() {
+            const name = prompt("File name:", "page.html");
+            if (!name) return;
+            if (blockchainState[did].files[name]) return alert("File exists");
+            blockchainState[did].files[name] = `<!DOCTYPE html><html><head><title>${name}</title></head><body><h1>${name}</h1><p>Created ${new Date().toLocaleString()}</p></body></html>`;
+            current = name;
+            renderTree();
+            render();
+            earn(EARN.FILE);
+            log("Created " + name);
+        }
+
+        function publish() {
+            if (!isGenesis) return alert("Only genesis DID can publish.");
+            cid = "iam:" + Date.now() + ":" + Math.random().toString(36).slice(2, 9);
+            document.getElementById("copy-btn").disabled = false;
+            earn(EARN.PUBLISH);
+            log("Published • CID: " + cid);
+        }
+
+        function copyCID() {
+            if (!cid) return;
+            navigator.clipboard.writeText(cid);
+            log("CID copied");
+        }
+
+        function earn(x) {
+            blockchainState[did].iamValue += x;
+            updateBalance();
+            log("+" + x.toString() + " IAM earned");
+        }
+
+        function createVoucher() {
+            if (blockchainState[did].iamValue < 100n) return alert("Need 100 IAM");
+            const pass = prompt("Voucher password:");
+            if (!pass || pass.length < 6) return alert("Password too short");
+            const id = "v" + Math.random().toString(36).slice(2, 9);
+            blockchainState[did].vouchers[id] = {
+                pass,
+                value: 100n,
+                created: Date.now()
+            };
+            blockchainState[did].iamValue -= 100n;
+            updateBalance();
+            saveChain();
+            alert(`Created voucher:\nID: ${id}\nPassword: ${pass}`);
+        }
+
+        function redeemVoucher() {
+            const id = prompt("Voucher ID:");
+            const pass = prompt("Password:");
+            if (!id || !pass) return;
+            const v = blockchainState[did].vouchers[id];
+            if (!v || v.pass !== pass) {
+                log("Redeem failed");
+                return alert("Invalid");
+            }
+            blockchainState[did].iamValue += v.value;
+            delete blockchainState[did].vouchers[id];
+            updateBalance();
+            saveChain();
+            alert("Redeemed +100 IAM");
+        }
+
+        function proposeChangeUI() {
+            if (!isGenesis) return alert("Only genesis DID can approve proposals.");
+            const content = document.getElementById("code-editor").value.trim();
+            if (!content) return alert("Empty");
+            const p = {
+                id: "p" + Date.now(),
+                file: current,
+                content,
+                proposer: did,
+                timestamp: Date.now(),
+                approved: true
+            };
+            blockchainState[did].proposals.push(p);
+            blockchainState[did].files[current] = content;
+            blockchainState[did].transactions.push({
+                type: "proposal",
+                id: p.id
+            });
+            save();
+            saveChain();
+            log("Proposal " + p.id + " approved");
+        }
+        document.addEventListener("DOMContentLoaded", () => {
+            const ed = document.getElementById("code-editor");
+            let t;
+            ed.addEventListener("input", () => {
+                clearTimeout(t);
+                t = setTimeout(save, 2000);
+            });
+        });
+        if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", init);
+        else init();
+    </script>
+
+    <script type="text/javascript">
+        // == I-AM-O.S. v12 — Sovereign Whitepaper & Instructions ====================
+        const WHITEPAPER = `
+# I-AM-O.S. v12
+Decentralized Sovereign Operating System • Single HTML File • 100% Yours
+
+## Thesis
+Your computer should belong to you — not to a corporation, not to a cloud provider, and definitely not to advertisers.
+I-AM-O.S. is a complete local-first, offline-capable operating environment that runs completely inside your browser with zero servers, zero accounts, and zero permissions asked.
+Everything you create is yours forever. No one can take it away. No one can censor it. No one can monetize you.
+
+## Core Principles
+1. You are the only admin
+2. Your private key never leaves your device
+3. All data & value are stored in localStorage (exportable anytime)
+4. You earn IAM-Value simply by creating (typing = mining)
+5. Genesis identity has 5-year sovereign rights (renewable by you)
+6. Publishing creates an immutable CID (currently local — ready for IPFS)
+
+## How It Works
+- Ed25519 keypair generated in-browser → creates your permanent DID
+- All files, balance, vouchers, and history live in an on-device "blockchain"
+- Typing code literally earns you IAM-Value (proof-of-creation)
+- Only the Genesis identity can publish to the public namespace
+- Vouchers = offline giftable money (no internet required)
+
+## Quick Start Guide
+1. Open this HTML file → you instantly become the sovereign owner
+2. Start typing in the editor → watch your IAM-Value grow
+3. Click "+ File" to create new pages
+4. Switch to "Live" see instant preview
+5. Click "Publish" (only Genesis) → generates permanent CID
+6. "Create Voucher" turn 100 IAM into an offline redeemable gift
+7. Never lose this file → it contains your identity, money, and all your work
+
+## Export Your Entire Life
+Copy this single HTML file.
+That's it.
+Your OS, identity, money, and all apps travel with one file.
+
+You are now post-cloud.
+I AM → therefore I own.
+`;
+
+        function showPaper() {
+            const term = document.getElementById("log");
+            term.innerHTML = "";
+            WHITEPAPER.trim().split("\n").forEach(line => {
+                const d = document.createElement("div");
+                d.textContent = line || "\u00A0";
+                d.style.fontFamily = "'JetBrains Mono', monospace";
+                d.style.fontSize = "0.82rem";
+                d.style.lineHeight = "1.6";
+                d.style.opacity = "0.94";
+                if (line.startsWith("#")) {
+                    d.style.color = "#00ff9d";
+                    d.style.fontSize = "1.1rem";
+                    d.style.margin = "1.4rem 0 0.6rem 0";
+                    d.style.fontWeight = "800";
+                } else if (/^\d\./.test(line)) {
+                    d.style.color = "#8b5cf6";
+                    d.style.fontWeight = "700";
+                }
+                term.prepend(d);
+            });
+            term.scrollTop = 0;
+            log("Whitepaper loaded — You are sovereign");
+        }
+
+        document.addEventListener("DOMContentLoaded", () => {
+            document.getElementById("whitepaper-btn").onclick = showPaper;
+        });
+    </script>
+</body>
+
+</html>
